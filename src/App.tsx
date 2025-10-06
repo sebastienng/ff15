@@ -1,35 +1,53 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+
+import { useGetCards } from "./common/hooks/useGetCards";
+import { Booster } from "./components/Booster/Booster";
+import { generateBoosters } from "./common/utils/boosters.utils.";
+import type { BoosterType } from "./common/types/boosters.type";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { commons, rares } = useGetCards();
+  const [packs, setPacks] = useState<BoosterType[]>([]);
+  const [totalPacks, setTotalPacks] = useState(7);
+
+  const handlePacksCreation = () => {
+    const newPacks = generateBoosters(commons, rares, totalPacks);
+    setPacks(newPacks);
+  };
+  const buttonLabel = packs.length ? "Get new packs" : "Get packs";
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <button onClick={handlePacksCreation} style={{ marginBottom: 20 }}>
+        {buttonLabel}
+      </button>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          marginBottom: 20,
+        }}
+      >
+        <label htmlFor="packs">Number of packs (1-21): </label>
+        <input
+          type="number"
+          name="packs"
+          min={1}
+          max={20}
+          defaultValue={7}
+          onChange={(e) => setTotalPacks(Number(e.target.value))}
+        />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        {packs.map((booster) => (
+          <Booster key={booster.boosterId} booster={booster} />
+        ))}
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
